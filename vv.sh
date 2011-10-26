@@ -11,6 +11,10 @@
 #                                                               #
 #################################################################
 
+#user="Joe Jiang <joejiang@linpus.com>"
+user="Joe Jiang <jiangchengbin2@tom.com>"
+
+
 #deal with user input  command
 case $1 in
 	"" )
@@ -103,6 +107,18 @@ case $1 in
 		;;
 	date )
 		LANG=en_US date
+		;;
+	update )
+		if [ "$2" == "spec" ];then
+			touch ~/.old_spec
+			old_spec=`cat ~/.old_spec`
+			if [ "$3" != "" ];then
+				old_spec="$3"
+			fi
+			cp ${old_spec} ${old_spec}.bk
+			rpmdev-bumpspec -u "${user}" -c "" ${old_spec}
+			vim ${old_spec}
+		fi
 		;;
 	* )
 		echo "输入参数不正确！"
