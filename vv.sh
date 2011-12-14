@@ -6,16 +6,21 @@
 # Lable:         vv.sh                                          #
 # Information:   Simple Command                                 #
 # Create Date:   2011-09-05                                     #
-# Modify Date:   2011-10-24                                     #
-# Version:       v1.5                                           #
+# Modify Date:   2011-11-26                                     #
+# Version:       v1.6                                           #
 #                                                               #
 #################################################################
 
-#user="Joe Jiang <joejiang@linpus.com>"
-user="Joe Jiang <jiangchengbin2@tom.com>"
+if [ "$USER" == "root" ];then
+	user="Joe Jiang <joejiang@linpus.com>"
+else
+	user="Joe Jiang <jiangchengbin2@tom.com>"
+fi
 
+# some variable
+sync_ip="`sudo cat /root/.sync_ip`"
 
-#deal with user input  command
+# deal with user input  command
 case $1 in
 	"" )
 		lftp preload:preload@192.168.1.26:/users/joe
@@ -61,6 +66,10 @@ case $1 in
 			fi
 			echo git remote add origin git@github.com:jiangchengbin/${project}.git
 			git remote add origin git@github.com:jiangchengbin/${project}.git
+		elif [ "$2" == "archive" ]; then
+			if [ "$3" != "" ]; then 
+				git archive --format=tar --prefix="$3/" HEAD | bzip2 > ../$3.tar.bz2
+			fi
 		fi
 		;;
 	vim )
@@ -116,10 +125,21 @@ case $1 in
 				old_spec="$3"
 			fi
 			cp ${old_spec} ${old_spec}.bk
+			echo rpmdev-bumpspec -u "${user}" -c "" ${old_spec}
 			rpmdev-bumpspec -u "${user}" -c "" ${old_spec}
 			vim ${old_spec}
 		fi
 		;;
+	sync )
+		shift
+		if [ "$1" == "" ];then
+			echo "sync ip:192.168.1.$sync_ip"
+		elif [ "$1" == "ip" -a "$2" != "" ];then
+			sudo echo "$2" > /root/.sync_ip
+		else
+			scp $@ root@192.168.1.$sync_ip:/scp
+		fi			
+		;;	
 	* )
 		echo "输入参数不正确！"
 		;;
